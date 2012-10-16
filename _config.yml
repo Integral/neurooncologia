@@ -1,8 +1,9 @@
 auto: true
 server: true
 pygments: true
-permalink: none
-root_dir: ""
+permalink: /:categories/:year/:month/:day/:title/
+root_dir: "http://integral.github.com/neurooncologia"
+baseurl: "http://theod1234.github.com/neurooncologia"
 oauth_client_id: caf55c20366465a1332d
 gatekeeper_url: http://poole-oauth-staging.herokuapp.com
 exclude:
