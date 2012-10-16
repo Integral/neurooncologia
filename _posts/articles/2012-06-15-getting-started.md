@@ -9,7 +9,7 @@ categories:
 - articles
 ---
 
-Here's how to get started with Poole.
+Here's how to get started with.
 
 
 Login with your Github User
