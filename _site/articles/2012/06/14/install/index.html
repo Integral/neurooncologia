@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Poole &middot; Serving Jekyll faithfully</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel='shortcut icon' href='/images/favicon.ico' type='image/x-icon' />
+    <link rel='stylesheet' href='/fonts/open-sans.css'>
+    <link rel='stylesheet' href='/app.css'>
+      <!-- Le styles -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+  <div class="navbar navbar-static-top">
+              <div class="navbar-inner">
+                <div class="container">
+                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </a>
+                  <a class="brand" href="#"><img src="http://neurooncologia.ru/sites/default/files/logo.gif" /></a>
+                  <div class="nav-collapse">
+                    <ul class="nav">
+                      <li class="active"><a href="#">Home</a></li>
+                      <li><a href="#">Link</a></li>
+                      <li><a href="#">Link</a></li>
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="#">Action</a></li>
+                          <li><a href="#">Another action</a></li>
+                          <li><a href="#">Something else here</a></li>
+                          <li class="divider"></li>
+                          <li class="nav-header">Nav header</li>
+                          <li><a href="#">Separated link</a></li>
+                          <li><a href="#">One more separated link</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                    <form class="navbar-search pull-left" action="">
+                      <input type="text" class="search-query span2" placeholder="Search">
+                    </form>
+                    <ul class="nav pull-right">
+                      <li><a href="#">Link</a></li>
+                      <li class="divider-vertical"></li>
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="#">Action</a></li>
+                          <li><a href="#">Another action</a></li>
+                          <li><a href="#">Something else here</a></li>
+                          <li class="divider"></li>
+                          <li><a href="#">Separated link</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div><!-- /.nav-collapse -->
+                </div>
+              </div><!-- /navbar-inner -->
+            </div>
+  <div id='container'>
+    <div id='main'><div class="help post-content">
+  <div class="title">Installation Instructions</div>
+  
+  <p>Poole itself is just a static webpage, and doesn't require any server-side bits. Instead it interacts directly with the Github API for managing your repo's contents.</p>
+
+<p>The Github API is somewhat funky from time to time, and hard to debug. We had to be aware of CORS issues and properly setting up headers for authorization. What's challenging here, is that Github just offers a low level API (around trees and blobs), which is problematic in many cases, as it requires a lot of subsequent requests to do simple things, which slows down site performance. That's why creating a good architecture was crucial to manage the complexity. I ended up in abstracting the data layer into a separate module, Github.js.</p>
+
+<h2>Github.js</h2>
+
+<p><a href="https://github.com/poole/github">Github.js</a> is a higher-level wrapper around the Github API. It's intended for exactly our use case, namely interacting with Github from the browser. It supports reading, writing, renaming and deleting files. Goal was to have a simple data abstraction layer, nothing to fancy, but providing exactly the operations we need.</p>
+
+<h2>Gatekeeper</h2>
+
+<p>Because of some <a href="http://blog.vjeux.com/2012/javascript/github-oauth-login-browser-side.html">security-related limitations</a>, Github prevents you from implementing the OAuth Web Application Flow on a client-side only application.</p>
+
+<p>This is a real bummer. So we built <a href="http://github.com/developmentseed/gatekeeper">Gatekeeper</a>, which is the missing piece you need in order to make OAuth work.</p>
+
+<h1>Installation</h1>
+
+<ol>
+<li><p>Fork and clone the repo in order to run your own instance of Poole.</p></li>
+<li><p>Setup a Github application, so CORS requests are possible as well as OAuth authentication.</p>
+
+<p><img src="http://f.cl.ly/items/011W1c0D2N1I0B3m0731/Screen%20Shot%202012-05-31%20at%203.33.15%20PM.png" alt="Setup Github Application" /></p></li>
+<li><p>Setup Gatekeeper.</p>
+
+<p>Follow the instructions here and fill in the information that is provided after registering a new Github Application.</p></li>
+<li><p>Adjust <code>_config.yml</code>.</p>
+
+<pre><code>auto: true
+server: true
+oauth_client_id: your_oauth_client_id
+gatekeeper_url: http://gatekeeper.example.com
+exclude:
+- .gitignore
+- README.md
+</code></pre></li>
+<li><p>Run it.</p>
+
+<pre><code>server:poole poole$ jekyll
+</code></pre></li>
+</ol>
+
+
+<h1>Limitations</h1>
+
+<p>The Github API comes with a number of limitations because of its low-level nature. Here is a the list of known issues related to that. I hope the folks at Github can help us (with some minor additions to their API) so we can eliminate them.</p>
+
+<ul>
+<li><p>Listing Repositories</p>
+
+<p>When listing the repositories, we can't determine which of them are actual Jekyll sites. Theoretically we could, by issuing a separate request that fetches repository information (such as branches) and looks for a <code>_config.yml</code> file. However this is way to slow, so we have to do it on-demand as you click on a repository.</p></li>
+<li><p>Organizations</p>
+
+<p>Repositories that live within your organizations can only be accessed by entering the url (<code>/:organization/:repo/:branch</code>) manually.</p></li>
+<li><p>Deleting and renaming files</p>
+
+<p>This requires a full tree to be written involving a new commit that points to that tree. In fact this is not a big problem with small repositories, but once they get bigger it's not only a performance issue, you'll get errors. Be aware that you may not (yet) be able to rename or delete files when working with bigger repositories.</p></li>
+</ul>
+
+
+  <div class="meta"> Posted by Michael on June 14, 2012 </div>
+</div></div>
+  </div>
+
+  <div id='footer'>
+    <div class="footer-content">
+      © 2009-2012 Mikhail Laskov &amp; Daniel Beilinson
+    </div>
+  </div>
+  <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js'></script>
+  <script src='/js/bootstrap.js'></script>
+  </body>
+</html>

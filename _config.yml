@@ -3,8 +3,8 @@ server: true
 pygments: true
 markdown: rdiscount
 permalink: /:categories/:year/:month/:day/:title/
-root_dir: ""
-baseurl: ""
+root_dir: "http://integral.github.com/neurooncologia"
+baseurl: "http://integral.github.com/neurooncologia"
 oauth_client_id: caf55c20366465a1332d
 gatekeeper_url: http://poole-oauth-staging.herokuapp.com
 exclude:
